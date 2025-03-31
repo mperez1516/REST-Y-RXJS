@@ -2,8 +2,12 @@ export interface Post {
     id: number;
     title: string;
     body: string;
+    tags: string[];
+    reactions: {
+      likes: number;
+      dislikes: number;
+    };
+    views: number;
     userId: number;
-    reactions: number;
-    comments?: Comment[]; // opcional, para incluir los comentarios luego
   }
   
