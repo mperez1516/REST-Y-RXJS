@@ -1,4 +1,8 @@
 import { Component } from '@angular/core';
+import { DummyApiService } from './services/dummy-api.service';
+import { User } from './models/user.model';
+import { Post } from './models/post.model';
+import { Comment } from './models/comment.model';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +10,33 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'taller2';
+  username: string = '';
+  user: User | null = null;
+  posts: Post[] = [];
+  selectedComments: { [postId: number]: Comment[] } = {};
+
+  constructor(private apiService: DummyApiService) {}
+
+  buscarUsuario(): void {
+    this.apiService.getUserByUsername(this.username).subscribe(user => {
+      this.user = user;
+      if (user) {
+        this.apiService.getPostsByUser(user.id).subscribe(posts => {
+          this.posts = posts;
+        });
+      } else {
+        this.posts = [];
+      }
+    });
+  }
+
+  cargarComentarios(postId: number): void {
+    if (!this.selectedComments[postId]) {
+      this.apiService.getCommentsByPost(postId).subscribe(comments => {
+        this.selectedComments[postId] = comments;
+      });
+    } else {
+      delete this.selectedComments[postId]; // Toggle
+    }
+  }
 }
