@@ -3,6 +3,8 @@ import { DummyApiService } from './services/dummy-api.service';
 import { User } from './models/user.model';
 import { Post } from './models/post.model';
 import { Comment } from './models/comment.model';
+import { switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -18,16 +20,16 @@ export class AppComponent {
   constructor(private apiService: DummyApiService) {}
 
   buscarUsuario(): void {
-    this.apiService.getUserByUsername(this.username).subscribe(user => {
-      this.user = user;
-      if (user) {
-        this.apiService.getPostsByUser(user.id).subscribe(posts => {
-          this.posts = posts;
-        });
-      } else {
-        this.posts = [];
-      }
-    });
+    this.apiService.getUserByUsername(this.username)
+      .pipe(
+        switchMap(user => {
+          this.user = user;
+          return user ? this.apiService.getPostsByUser(user.id) : of([]); 
+        })
+      )
+      .subscribe(posts => {
+        this.posts = posts;
+      });
   }
 
   cargarComentarios(postId: number): void {
@@ -39,4 +41,5 @@ export class AppComponent {
       delete this.selectedComments[postId]; // Toggle
     }
   }
+
 }
